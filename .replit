@@ -1,2 +1,2 @@
 language="csharp"
-run="./dotnet run -p ChicAPI"
+run="./dotnet run -p DataGrabber"
