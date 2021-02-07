@@ -7,9 +7,9 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Threading.Tasks;
+using ChicAPI.Chic;
+using EpicGames.NET.Models;
+using System.Reactive.Concurrency;
 
 namespace ChicAPI
 {
@@ -21,12 +21,26 @@ namespace ChicAPI
 
         public static void Main(string[] args)
         {
-            Console.WriteLine(OAuthService.LoginURL);
-            Epic = new EpicServices(GetSid(), OAuthService.AuthTokenType.LAUNCHER);
+            if (Database.TryGetValue("AccessToken", out string token))
+            {
+                try
+                {
+                    Epic = new EpicServices(token);
+                }
+                catch (EpicGamesException)
+                {
+                    Epic = new EpicServices(GetSid(), OAuthService.AuthTokenType.LAUNCHER);
+                }
+            }
+            else Epic = new EpicServices(GetSid(), OAuthService.AuthTokenType.LAUNCHER);
 
-            Console.WriteLine(Epic.Account.DisplayName);
+            Database.SetValue("AccessToken", Epic.AccessToken);
 
-            Epic.KillSession();
+            Scheduler.Default.Schedule(Epic.ExpiresAt.AddSeconds(-10), reschedule =>
+            {
+                Epic.RefreshSession();
+                reschedule(Epic.ExpiresAt.AddSeconds(-10));
+            });
 
             CreateHostBuilder(args).Build().Run();
         }
@@ -41,6 +55,8 @@ namespace ChicAPI
     
         private static string GetSid()
         {
+            Console.WriteLine(OAuthService.LoginURL);
+
             using (var stream = File.CreateText($"{Root}input"))
             {
                 stream.WriteLine("sid=[INSERT SID HERE]");

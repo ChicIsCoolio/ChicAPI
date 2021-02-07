@@ -1,11 +1,6 @@
 ﻿using ChicAPI.Models;
-using EpicGames.NET;
-using EpicGames.NET.Structs;
+using EpicGames.NET.Models;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace ChicAPI.Controllers
 {
