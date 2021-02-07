@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30709.132
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Grabber", "Grabber.csproj", "{C8D26AC0-42AF-402D-92B8-A6465765879D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChicAPI", "ChicAPI.csproj", "{1DEFF184-62CB-4B8E-859F-E677DF9CCFB7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,15 +11,15 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{C8D26AC0-42AF-402D-92B8-A6465765879D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C8D26AC0-42AF-402D-92B8-A6465765879D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C8D26AC0-42AF-402D-92B8-A6465765879D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C8D26AC0-42AF-402D-92B8-A6465765879D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1DEFF184-62CB-4B8E-859F-E677DF9CCFB7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1DEFF184-62CB-4B8E-859F-E677DF9CCFB7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1DEFF184-62CB-4B8E-859F-E677DF9CCFB7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1DEFF184-62CB-4B8E-859F-E677DF9CCFB7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {C268ECBF-A98E-46FE-86DF-E5866833004C}
+		SolutionGuid = {0B66DAB2-9532-4DC0-9A27-5F155682AF7A}
 	EndGlobalSection
 EndGlobal
