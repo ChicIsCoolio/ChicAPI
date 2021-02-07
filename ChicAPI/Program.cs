@@ -23,18 +23,28 @@ namespace ChicAPI
         {
             if (Database.TryGetValue("AccessToken", out string token))
             {
-                try
+                if (Database.TryGetValue("RefreshToken", out string refreshToken))
                 {
-                    Epic = new EpicServices(token);
-                }
-                catch (EpicGamesException)
-                {
-                    Epic = new EpicServices(GetSid(), OAuthService.AuthTokenType.LAUNCHER);
+                    if (Database.TryGetValue("ExpiresAt", out string expiresAt))
+                    {
+                        try
+                        {
+                            Epic = new EpicServices(token, refreshToken, DateTime.Parse(expiresAt));
+                        }
+                        catch (EpicGamesException)
+                        {
+                            Epic = new EpicServices(GetSid(), OAuthService.AuthTokenType.LAUNCHER);
+                        }
+                    }
                 }
             }
             else Epic = new EpicServices(GetSid(), OAuthService.AuthTokenType.LAUNCHER);
 
             Database.SetValue("AccessToken", Epic.AccessToken);
+            Database.SetValue("RefreshToken", Epic.RefreshToken);
+            Database.SetValue("ExpiresAt", Epic.ExpiresAt.ToString("o"));
+
+            Console.WriteLine($"Authed as {Epic.Account.DisplayName}");
 
             Scheduler.Default.Schedule(Epic.ExpiresAt.AddSeconds(-10), reschedule =>
             {
