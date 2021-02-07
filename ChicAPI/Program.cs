@@ -21,8 +21,6 @@ namespace ChicAPI
 
         public static void Main(string[] args)
         {
-            Root = "C:\\Users\\Hopík\\source\\repos\\ChicAPI\\";
-
             Console.WriteLine(OAuthService.LoginURL);
             Epic = new EpicServices(GetSid(), OAuthService.AuthTokenType.LAUNCHER);
 
