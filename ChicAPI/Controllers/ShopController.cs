@@ -34,15 +34,34 @@ namespace ChicAPI.Controllers
                 {
                     ShopEntry e = new ShopEntry
                     {
-                        Items = new EntryItem[0]
+                        OfferId = entry.OfferId,
+                        OfferType = entry.OfferType,
+                        CurrencyType = entry.Prices[0].CurrencyType,
+                        RegularPrice = entry.Prices[0].RegularPrice,
+                        BasePrice = entry.Prices[0].BasePrice,
+                        FinalPrice = entry.Prices[0].FinalPrice,
+                        Categories = entry.Categories,
+                        Items = new EntryItem[0],
+                        SortPriority = entry.SortPriority,
+                        MetaInfo = entry.MetaInfo,
+                        Meta = entry.Meta
                     };
 
                     foreach (var grant in entry.ItemGrants)
                     {
+                        var id = grant.TemplateId.Split(':')[1];
+                        var info = Program.FortniteApi.V2.Cosmetics.GetBr(id).Data;
+
                         e.Items = e.Items.Append(new EntryItem
                         {
-                            Id = grant.TemplateId.Split(':')[1],
-                            Quantity = grant.Quantity
+                            Id = id,
+                            Quantity = grant.Quantity,
+                            Image = info.Images.HasFeatured ? info.Images.Featured : info.Images.Icon,
+                            Name = info.Name,
+                            Rarity = info.Rarity,
+                            Series = info.Series,
+                            Type = info.Type,
+                            ShopHistory = info.ShopHistory.ToArray()
                         }).ToArray();
                     }
 
@@ -51,6 +70,11 @@ namespace ChicAPI.Controllers
 
                     if (!shop.Sections.ContainsKey(sectionId))
                     {
+                        shop.SectionInfos = shop.SectionInfos.Append(new ShopSection
+                        {
+                            SectionId = sectionId
+                        }).ToArray();
+
                         shop.Sections.Add(sectionId, new ShopEntry[] { e });
                     }
                     else

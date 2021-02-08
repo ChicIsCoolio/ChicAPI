@@ -10,6 +10,7 @@ using System.IO;
 using ChicAPI.Chic;
 using EpicGames.NET.Models;
 using System.Reactive.Concurrency;
+using Fortnite_API;
 
 namespace ChicAPI
 {
@@ -18,9 +19,12 @@ namespace ChicAPI
         public static string Root = "/home/runner/ChicAPI/";
 
         public static EpicServices Epic;
+        public static FortniteApi FortniteApi;
 
         public static void Main(string[] args)
         {
+            FortniteApi = new FortniteApi(Environment.GetEnvironmentVariable("APIKEY"));
+
             try
             {
                 if (Database.TryGetValue("AccessToken", out string token))
