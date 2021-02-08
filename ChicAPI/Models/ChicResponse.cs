@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -13,8 +14,10 @@ namespace ChicAPI.Models
 
     public struct ChicResponse<T>
     {
-        public Status Status { get; set; }
-        public T Data { get; set; }
+        [JsonProperty("status")]
+        public Status Status;
+        [JsonProperty("data")]
+        public T Data;
 
         public ChicResponse(Status status, T data)
         {

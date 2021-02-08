@@ -4,6 +4,9 @@ using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using Newtonsoft.Json;
+using System.Collections.Generic;
+using EntryItem = ChicAPI.Models.EntryItem;
+using Microsoft.AspNetCore.Http.Features;
 
 namespace ChicAPI.Controllers
 {
@@ -11,13 +14,56 @@ namespace ChicAPI.Controllers
     [ApiController]
     public class ShopController : Controller
     {
-        [HttpGet]
+        [HttpGet("br")]
         public ActionResult<ChicResponse<ChicShop>> GetShop()
         {
             if (!IsAuthed())
                 return Unauthorized(new { Error = "Unauthorized", Message = "Try again later" });
 
-            return new ChicResponse<ChicShop>(Status.NOT_READY, null);
+            var catalog = GetCatalog();
+            var shop = new ChicShop();
+
+            shop.Expiration = catalog.Expiration;
+            shop.Sections = new Dictionary<ShopSection, ShopEntry[]>();
+
+            foreach (var storefront in catalog.Storefronts.Where(x => x.Name == "BRWeeklyStorefront"
+                || x.Name == "BRDailyStorefront" || x.Name == "BRSpecialFeatured"
+                || x.Name == "BRSpecialDaily"))
+            {
+                foreach (var entry in storefront.Entries)
+                {
+                    ShopEntry e = new ShopEntry
+                    {
+                        Items = new EntryItem[0]
+                    };
+
+                    foreach (var grant in entry.ItemGrants)
+                    {
+                        e.Items.Append(new EntryItem
+                        {
+                            Id = grant.TemplateId.Split(':')[1],
+                            Quantity = grant.Quantity
+                        });
+                    }
+
+                    if (!entry.Meta.TryGetValue("SectionId", out string sectionId))
+                        sectionId = entry.MetaInfo.First(x => x.Key == "SectionId").Value;
+
+                    if (!shop.Sections.ToList().Any(x => x.Key.SectionId == sectionId))
+                    {
+                        shop.Sections.Add(new ShopSection
+                        {
+                            SectionId = sectionId
+                        }, new ShopEntry[] { e });
+                    }
+                    else
+                    {
+                        shop.Sections.First(x => x.Key.SectionId == sectionId).Value.Append(e);
+                    }
+                }
+            }
+
+            return new ChicResponse<ChicShop>(Status.OK, shop);
         }
 
         [HttpGet("raw")]
