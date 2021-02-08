@@ -18,8 +18,16 @@ namespace ChicAPI.Chic
 
         public static bool TryGetValue(string key, out string value)
         {
-            value = Client.Execute(new RestRequest("/{key}").AddUrlSegment("key", key)).Content;
-            return !string.IsNullOrEmpty(value);
+            try
+            {
+                value = Client.Execute(new RestRequest("/{key}").AddUrlSegment("key", key)).Content;
+                return !string.IsNullOrEmpty(value);
+            }
+            catch
+            {
+                value = "";
+                return false;
+            }
         }
 
         public static void RemoveValue(string key)
