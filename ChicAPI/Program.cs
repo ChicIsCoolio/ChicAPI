@@ -33,8 +33,10 @@ namespace ChicAPI
                             {
                                 Epic = new EpicServices(token, refreshToken, DateTime.Parse(expiresAt));
                             }
-                            catch (EpicGamesException)
+                            catch (EpicGamesException e)
                             {
+                                Console.WriteLine(e.ErrorCode);
+                                Console.WriteLine(e.ErrorMessage);
                                 Epic = new EpicServices(GetSid(), OAuthService.AuthTokenType.LAUNCHER);
                             }
                         }
@@ -87,6 +89,24 @@ namespace ChicAPI
             File.Delete($"{Root}input");
 
             return sid;
+        }
+
+        public static string[] ListCache() => Directory.GetFiles($"{Root}Cache");
+
+        public static string LoadFromCache(string fileName)
+        {
+            using (StreamReader reader = new StreamReader($"{Root}Cache/{fileName}"))
+            {
+                return reader.ReadToEnd();
+            }
+        }
+
+        public static void SaveToCache(string data, string fileName)
+        {
+            using (StreamWriter writer = new StreamWriter($"{Root}Cache/{fileName}"))
+            {
+                writer.Write(data);
+            }
         }
     }
 }

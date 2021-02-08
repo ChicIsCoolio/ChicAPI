@@ -1,5 +1,6 @@
-﻿using ChicAPI.Models;
+using ChicAPI.Models;
 using EpicGames.NET.Models;
+using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ChicAPI.Controllers
@@ -18,12 +19,39 @@ namespace ChicAPI.Controllers
         }
 
         [HttpGet("raw")]
-        public ActionResult<Catalog> GetShopRaw()
+        public ActionResult<string[]> GetShopRaw()
         {
             if (!IsAuthed())
                 return Unauthorized(new { Error = "Unauthorized", Message = "Try again later" });
+        
+            Program.SaveToCache("data", "test.txt");
+            Program.SaveToCache("data2", "test2.txt");
 
-            return Program.Epic.GetCatalog();
+            return Program.ListCache();
+
+            /*if (HasCatalogInCache(out Catalog catalog)) return catalog;
+            else return GetCatalog();*/
+        }
+
+        Catalog GetCatalog()
+        {
+            var catalog = Program.Epic.GetCatalog();
+
+
+
+            return catalog;
+        }
+
+        bool HasCatalogInCache(out Catalog catalog)
+        {
+            catalog = new Catalog();
+
+            foreach (var file in Program.ListCache().Where(x => x.Contains("RawShop_")))
+            {
+
+            }
+
+            return false;
         }
 
         bool IsAuthed()
