@@ -24,7 +24,7 @@ namespace ChicAPI.Controllers
             var shop = new ChicShop();
 
             shop.Expiration = catalog.Expiration;
-            shop.Sections = new Dictionary<ShopSection, ShopEntry[]>();
+            shop.Sections = new Dictionary<string, ShopEntry[]>();
 
             foreach (var storefront in catalog.Storefronts.Where(x => x.Name == "BRWeeklyStorefront"
                 || x.Name == "BRDailyStorefront" || x.Name == "BRSpecialFeatured"
@@ -39,26 +39,23 @@ namespace ChicAPI.Controllers
 
                     foreach (var grant in entry.ItemGrants)
                     {
-                        e.Items.Append(new EntryItem
+                        e.Items = e.Items.Append(new EntryItem
                         {
                             Id = grant.TemplateId.Split(':')[1],
                             Quantity = grant.Quantity
-                        });
+                        }).ToArray();
                     }
 
                     if (!entry.Meta.TryGetValue("SectionId", out string sectionId))
                         sectionId = entry.MetaInfo.First(x => x.Key == "SectionId").Value;
 
-                    if (!shop.Sections.ToList().Any(x => x.Key.SectionId == sectionId))
+                    if (!shop.Sections.ContainsKey(sectionId))
                     {
-                        shop.Sections.Add(new ShopSection
-                        {
-                            SectionId = sectionId
-                        }, new ShopEntry[] { e });
+                        shop.Sections.Add(sectionId, new ShopEntry[] { e });
                     }
                     else
                     {
-                        shop.Sections.First(x => x.Key.SectionId == sectionId).Value.Append(e);
+                        shop.Sections[sectionId] = shop.Sections[sectionId].Append(e).ToArray();
                     }
                 }
             }

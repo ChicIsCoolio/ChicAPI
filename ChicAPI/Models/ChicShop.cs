@@ -11,7 +11,9 @@ namespace ChicAPI.Models
         [JsonProperty("expiration")]
         public DateTime Expiration;
         [JsonProperty("sections")]
-        public Dictionary<ShopSection, ShopEntry[]> Sections;
+        public Dictionary<string, ShopEntry[]> Sections;
+        [JsonProperty("sections_")]
+        public ShopSection[] Sections_;
     }
 
     public struct ShopSection
