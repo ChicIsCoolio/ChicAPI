@@ -25,6 +25,7 @@ namespace ChicAPI.Controllers
 
             shop.Expiration = catalog.Expiration;
             shop.Sections = new Dictionary<string, ShopEntry[]>();
+            shop.SectionInfos = new ShopSection[0];
 
             foreach (var storefront in catalog.Storefronts.Where(x => x.Name == "BRWeeklyStorefront"
                 || x.Name == "BRDailyStorefront" || x.Name == "BRSpecialFeatured"
@@ -36,10 +37,10 @@ namespace ChicAPI.Controllers
                     {
                         OfferId = entry.OfferId,
                         OfferType = entry.OfferType,
-                        CurrencyType = entry.Prices[0].CurrencyType,
-                        RegularPrice = entry.Prices[0].RegularPrice,
-                        BasePrice = entry.Prices[0].BasePrice,
-                        FinalPrice = entry.Prices[0].FinalPrice,
+                        CurrencyType = entry.Prices.Length > 0 ? entry.Prices[0].CurrencyType : "",
+                        RegularPrice = entry.Prices.Length > 0 ? entry.Prices[0].RegularPrice : 0,
+                        BasePrice = entry.Prices.Length > 0 ? entry.Prices[0].BasePrice : 0,
+                        FinalPrice = entry.Prices.Length > 0 ? entry.Prices[0].FinalPrice : 0,
                         Categories = entry.Categories,
                         Items = new EntryItem[0],
                         SortPriority = entry.SortPriority,
