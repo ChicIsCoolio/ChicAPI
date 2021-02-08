@@ -2,6 +2,8 @@ using ChicAPI.Models;
 using EpicGames.NET.Models;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using Newtonsoft.Json;
 
 namespace ChicAPI.Controllers
 {
@@ -19,39 +21,33 @@ namespace ChicAPI.Controllers
         }
 
         [HttpGet("raw")]
-        public ActionResult<string[]> GetShopRaw()
+        public ActionResult<Catalog> GetShopRaw()
         {
             if (!IsAuthed())
                 return Unauthorized(new { Error = "Unauthorized", Message = "Try again later" });
         
-            Program.SaveToCache("data", "test.txt");
-            Program.SaveToCache("data2", "test2.txt");
-
-            return Program.ListCache();
-
-            /*if (HasCatalogInCache(out Catalog catalog)) return catalog;
-            else return GetCatalog();*/
+            return GetCatalog();
         }
 
         Catalog GetCatalog()
         {
-            var catalog = Program.Epic.GetCatalog();
-
-
-
-            return catalog;
+            if (HasCatalogInCache(out Catalog catalog)) return catalog;
+            else return Program.Epic.GetCatalog();
         }
 
         bool HasCatalogInCache(out Catalog catalog)
         {
             catalog = new Catalog();
 
-            foreach (var file in Program.ListCache().Where(x => x.Contains("RawShop_")))
+            var date = Program.ListCache().Where(x => x.Contains("RawShop_"))
+                .Max(x => DateTime.Parse(x.Replace("RawShop_", "")));
+
+            if (date - DateTime.UtcNow > TimeSpan.Zero)
             {
-
+                catalog = JsonConvert.DeserializeObject<Catalog>(Program.LoadFromCache($"RawShop_{date.ToString("o")}"));
+                return true;
             }
-
-            return false;
+            else return false;
         }
 
         bool IsAuthed()
