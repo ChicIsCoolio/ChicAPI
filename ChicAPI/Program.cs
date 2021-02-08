@@ -21,24 +21,32 @@ namespace ChicAPI
 
         public static void Main(string[] args)
         {
-            if (Database.TryGetValue("AccessToken", out string token))
+            try
             {
-                if (Database.TryGetValue("RefreshToken", out string refreshToken))
+                if (Database.TryGetValue("AccessToken", out string token))
                 {
-                    if (Database.TryGetValue("ExpiresAt", out string expiresAt))
+                    if (Database.TryGetValue("RefreshToken", out string refreshToken))
                     {
-                        try
+                        if (Database.TryGetValue("ExpiresAt", out string expiresAt))
                         {
-                            Epic = new EpicServices(token, refreshToken, DateTime.Parse(expiresAt));
-                        }
-                        catch (EpicGamesException)
-                        {
-                            Epic = new EpicServices(GetSid(), OAuthService.AuthTokenType.LAUNCHER);
+                            try
+                            {
+                                Epic = new EpicServices(token, refreshToken, DateTime.Parse(expiresAt));
+                            }
+                            catch (EpicGamesException)
+                            {
+                                Epic = new EpicServices(GetSid(), OAuthService.AuthTokenType.LAUNCHER);
+                            }
                         }
                     }
                 }
+                else Epic = new EpicServices(GetSid(), OAuthService.AuthTokenType.LAUNCHER);
             }
-            else Epic = new EpicServices(GetSid(), OAuthService.AuthTokenType.LAUNCHER);
+            catch (EpicGamesException e)
+            {
+                Console.WriteLine(e.ErrorCode);
+                Console.WriteLine(e.ErrorMessage);
+            }
 
             Database.SetValue("AccessToken", Epic.AccessToken);
             Database.SetValue("RefreshToken", Epic.RefreshToken);

@@ -607,7 +607,7 @@ get_user_install_path() {
     if [ ! -z "${DOTNET_INSTALL_DIR:-}" ]; then
         echo "$DOTNET_INSTALL_DIR"
     else
-        echo "$HOME/.dotnet"
+        echo "$HOME/dotnet"
     fi
     return 0
 }
@@ -1113,7 +1113,7 @@ say "Installation finished successfully."
 
 
 # -------- AMC ------------------
-DN=$HOME/.dotnet/dotnet
+DN=$HOME/dotnet/dotnet
 if [ ! -f "$DN" ]; then
     run_installer #"$@"
 fi
