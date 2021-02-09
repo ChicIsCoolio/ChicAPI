@@ -18,90 +18,97 @@ namespace ChicAPI.Controllers
         [HttpGet("br")]
         public ActionResult<ChicResponse<ChicShop>> GetShop()
         {
-            if (!IsAuthed())
-                return Unauthorized(new { Error = "Unauthorized", Message = "Try again later" });
-
-            var catalog = GetCatalog();
-            var content = Program.Epic.FortniteService.GetContent();
-            var shop = new ChicShop();
-
-            shop.Expiration = catalog.Expiration;
-            shop.Sections = new Dictionary<string, List<ShopEntry>>();
-            shop.SectionInfos = new List<ShopSection>();
-
-            foreach (var storefront in catalog.Storefronts.Where(x => x.Name == "BRWeeklyStorefront"
-                || x.Name == "BRDailyStorefront" || x.Name == "BRSpecialFeatured"
-                || x.Name == "BRSpecialDaily"))
+            try
             {
-                foreach (var entry in storefront.Entries)
+                if (!IsAuthed())
+                    return Unauthorized(new { Error = "Unauthorized", Message = "Try again later" });
+
+                var catalog = GetCatalog();
+                var content = Program.Epic.FortniteService.GetContent();
+                var shop = new ChicShop();
+
+                shop.Expiration = catalog.Expiration;
+                shop.Sections = new Dictionary<string, List<ShopEntry>>();
+                shop.SectionInfos = new List<ShopSection>();
+
+                foreach (var storefront in catalog.Storefronts.Where(x => x.Name == "BRWeeklyStorefront"
+                    || x.Name == "BRDailyStorefront" || x.Name == "BRSpecialFeatured"
+                    || x.Name == "BRSpecialDaily"))
                 {
-                    ShopEntry e = new ShopEntry
+                    foreach (var entry in storefront.Entries)
                     {
-                        OfferId = entry.OfferId,
-                        OfferType = entry.OfferType,
-                        CurrencyType = entry.Prices.Length > 0 ? entry.Prices[0].CurrencyType : "",
-                        RegularPrice = entry.Prices.Length > 0 ? entry.Prices[0].RegularPrice : 0,
-                        BasePrice = entry.Prices.Length > 0 ? entry.Prices[0].BasePrice : 0,
-                        FinalPrice = entry.Prices.Length > 0 ? entry.Prices[0].FinalPrice : 0,
-                        Categories = entry.Categories,
-                        Items = new List<EntryItem>(),
-                        SortPriority = entry.SortPriority,
-                        MetaInfo = entry.MetaInfo,
-                        Meta = entry.Meta
-                    };
-
-                    foreach (var grant in entry.ItemGrants)
-                    {
-                        var id = grant.TemplateId.Split(':')[1];
-                        var info = Program.FortniteApi.V2.Cosmetics.GetBr(id).Data;
-
-                        e.Items.Add(new EntryItem
+                        ShopEntry e = new ShopEntry
                         {
-                            Id = id,
-                            Quantity = grant.Quantity,
-                            Image = info.Images.HasFeatured ? info.Images.Featured : info.Images.Icon,
-                            Name = info.Name,
-                            Rarity = info.Rarity,
-                            Series = info.Series,
-                            Type = info.Type,
-                            ShopHistory = info.ShopHistory.ToArray()
-                        });
-                    }
+                            OfferId = entry.OfferId,
+                            OfferType = entry.OfferType,
+                            CurrencyType = entry.Prices.Length > 0 ? entry.Prices[0].CurrencyType : "",
+                            RegularPrice = entry.Prices.Length > 0 ? entry.Prices[0].RegularPrice : 0,
+                            BasePrice = entry.Prices.Length > 0 ? entry.Prices[0].BasePrice : 0,
+                            FinalPrice = entry.Prices.Length > 0 ? entry.Prices[0].FinalPrice : 0,
+                            Categories = entry.Categories,
+                            Items = new List<EntryItem>(),
+                            SortPriority = entry.SortPriority,
+                            MetaInfo = entry.MetaInfo,
+                            Meta = entry.Meta
+                        };
 
-                    if (!entry.Meta.TryGetValue("SectionId", out string sectionId))
-                        sectionId = entry.MetaInfo.First(x => x.Key == "SectionId").Value;
-
-                    if (!shop.Sections.ContainsKey(sectionId))
-                    {
-                        var section = content.ShopSections.GetSectionById(sectionId);
-
-                        shop.SectionInfos.Add(new ShopSection
+                        foreach (var grant in entry.ItemGrants)
                         {
-                            DisplayName = section.DisplayName,
-                            SectionId = sectionId,
-                            LandingPriority = section.LandingPriority
-                        });
+                            var id = grant.TemplateId.Split(':')[1];
+                            var info = Program.FortniteApi.V2.Cosmetics.GetBr(id).Data;
 
-                        shop.Sections.Add(sectionId, new List<ShopEntry> { e });
-                    }
-                    else
-                    {
-                        shop.Sections[sectionId].Add(e);
+                            e.Items.Add(new EntryItem
+                            {
+                                Id = id,
+                                Quantity = grant.Quantity,
+                                Image = info.Images.HasFeatured ? info.Images.Featured : info.Images.Icon,
+                                Name = info.Name,
+                                Rarity = info.Rarity,
+                                Series = info.Series,
+                                Type = info.Type,
+                                ShopHistory = info.ShopHistory.ToArray()
+                            });
+                        }
+
+                        if (!entry.Meta.TryGetValue("SectionId", out string sectionId))
+                            sectionId = entry.MetaInfo.First(x => x.Key == "SectionId").Value;
+
+                        if (!shop.Sections.ContainsKey(sectionId))
+                        {
+                            var section = content.ShopSections.GetSectionById(sectionId);
+
+                            shop.SectionInfos.Add(new ShopSection
+                            {
+                                DisplayName = section.DisplayName,
+                                SectionId = sectionId,
+                                LandingPriority = section.LandingPriority
+                            });
+
+                            shop.Sections.Add(sectionId, new List<ShopEntry> { e });
+                        }
+                        else
+                        {
+                            shop.Sections[sectionId].Add(e);
+                        }
                     }
                 }
+
+                shop.SectionInfos.Sort(ShopSectionComparer.Comparer);
+                var sections = new Dictionary<string, List<ShopEntry>>();
+
+                foreach (var section in shop.SectionInfos)
+                {
+                    sections.Add(section.SectionId, shop.Sections.First(predicate: x => x.Key == section.SectionId).Value);
+                }
+
+                shop.Sections = sections;
+
+                return new ChicResponse<ChicShop>(Status.OK, shop);
             }
-
-            shop.SectionInfos.Sort(ShopSectionComparer.Comparer);
-            var sections = new Dictionary<string, List<ShopEntry>>();
-
-            foreach (var section in shop.SectionInfos)
+            catch
             {
-                sections.Add(section.SectionId, shop.Sections.First(predicate: x => x.Key == section.SectionId).Value);
+                return new ChicResponse<ChicShop>(Status.NOT_READY, new ChicShop());
             }
-
-            shop.Sections = sections;
-
-            return new ChicResponse<ChicShop>(Status.OK, shop);
         }
 
         [HttpGet("raw")]
