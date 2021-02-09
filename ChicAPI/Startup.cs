@@ -37,6 +37,10 @@ namespace ChicAPI
             app.UseRouting();
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapGet("/", async context =>
+                {
+                    await context.Response.WriteAsync("Hello World!");
+                });
                 endpoints.MapControllers();
                 //endpoints.MapControllerRoute("default", "api/v1/{controller}");
             });
