@@ -24,23 +24,18 @@ namespace ChicAPI
         public static void Main(string[] args)
         {
             FortniteApi = new FortniteApi(Environment.GetEnvironmentVariable("APIKEY"));
-
+            
             try
             {
-                Console.WriteLine("1");
-
                 if (Database.TryGetValue("AccessToken", out string token) &&
-                    Database.TryGetValue("RefreshToken", out string refreshToken) &&
-                    Database.TryGetValue("ExpiresAt", out string expiresAt))
+                    Database.TryGetValue("RefreshToken", out string refreshToken))
                 {
                     try
                     {
-                        Epic = new EpicServices(token, refreshToken, DateTime.Parse(expiresAt));
-                        Console.WriteLine("5A");
+                        Epic = new EpicServices(token, refreshToken);
                     }
                     catch (EpicGamesException e)
                     {
-                        Console.WriteLine("5B");
                         Console.WriteLine(e.ErrorCode);
                         Console.WriteLine(e.ErrorMessage);
                         Epic = new EpicServices(GetSid(), OAuthService.AuthTokenType.LAUNCHER);
@@ -55,11 +50,8 @@ namespace ChicAPI
                 Epic = new EpicServices(GetSid(), OAuthService.AuthTokenType.LAUNCHER);
             }
 
-            Console.WriteLine(Epic == null);
-
             Database.SetValue("AccessToken", Epic.AccessToken);
             Database.SetValue("RefreshToken", Epic.RefreshToken);
-            Database.SetValue("ExpiresAt", Epic.ExpiresAt.ToString("o"));
 
             Console.WriteLine($"Authed as {Epic.Account.DisplayName}");
 
