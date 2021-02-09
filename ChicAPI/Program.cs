@@ -64,7 +64,8 @@ namespace ChicAPI
                 reschedule(Epic.ExpiresAt.AddSeconds(-10));
             });
 
-            Scheduler.Default.Schedule(ShopController.GetCatalog().Expiration, reschedule =>
+            //          No need to get the shop every hour cuz it's pretty quick now (0.6~ seconds)
+            /*Scheduler.Default.Schedule(ShopController.GetCatalog().Expiration, reschedule =>
             {
                 reschedule(ShopController.GetCatalog().Expiration);
             });
@@ -74,7 +75,7 @@ namespace ChicAPI
                 var shop = ShopController.GetChicShop();
                 if (shop.Status == Status.NOT_READY) reschedule(DateTimeOffset.Now.AddSeconds(5));
                 else reschedule(shop.Data.Expiration);
-            });
+            });*/
 
             CreateHostBuilder(args).Build().Run();
         }
