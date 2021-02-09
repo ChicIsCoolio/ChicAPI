@@ -88,7 +88,8 @@ namespace ChicAPI.Controllers
                         foreach (var grant in entry.ItemGrants)
                         {
                             var id = grant.TemplateId.Split(':')[1];
-                            var info = apiEntry.Items.First(predicate: x => x.Id == id);
+
+                            var info = apiEntry.Items.First(predicate: x => x.Id.ToLower() == id.ToLower());
 
                             e.Items.Add(new EntryItem
                             {

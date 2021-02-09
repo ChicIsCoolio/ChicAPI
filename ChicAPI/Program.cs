@@ -69,10 +69,10 @@ namespace ChicAPI
                 reschedule(ShopController.GetCatalog().Expiration);
             });
 
-            Scheduler.Default.Schedule(ShopController.GetChicShop().Data.Expiration, reschedule =>
+            Scheduler.Default.Schedule(ShopController.GetChicShop().Data.Expiration.AddSeconds(1), reschedule =>
             {
                 var shop = ShopController.GetChicShop();
-                if (shop.Status == Status.NOT_READY) reschedule(DateTimeOffset.Now.AddSeconds(30));
+                if (shop.Status == Status.NOT_READY) reschedule(DateTimeOffset.Now.AddSeconds(5));
                 else reschedule(shop.Data.Expiration);
             });
 
