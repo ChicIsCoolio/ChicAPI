@@ -27,23 +27,23 @@ namespace ChicAPI
 
             try
             {
-                if (Database.TryGetValue("AccessToken", out string token))
+                Console.WriteLine("1");
+
+                if (Database.TryGetValue("AccessToken", out string token) &&
+                    Database.TryGetValue("RefreshToken", out string refreshToken) &&
+                    Database.TryGetValue("ExpiresAt", out string expiresAt))
                 {
-                    if (Database.TryGetValue("RefreshToken", out string refreshToken))
+                    try
                     {
-                        if (Database.TryGetValue("ExpiresAt", out string expiresAt))
-                        {
-                            try
-                            {
-                                Epic = new EpicServices(token, refreshToken, DateTime.Parse(expiresAt));
-                            }
-                            catch (EpicGamesException e)
-                            {
-                                Console.WriteLine(e.ErrorCode);
-                                Console.WriteLine(e.ErrorMessage);
-                                Epic = new EpicServices(GetSid(), OAuthService.AuthTokenType.LAUNCHER);
-                            }
-                        }
+                        Epic = new EpicServices(token, refreshToken, DateTime.Parse(expiresAt));
+                        Console.WriteLine("5A");
+                    }
+                    catch (EpicGamesException e)
+                    {
+                        Console.WriteLine("5B");
+                        Console.WriteLine(e.ErrorCode);
+                        Console.WriteLine(e.ErrorMessage);
+                        Epic = new EpicServices(GetSid(), OAuthService.AuthTokenType.LAUNCHER);
                     }
                 }
                 else Epic = new EpicServices(GetSid(), OAuthService.AuthTokenType.LAUNCHER);
@@ -52,7 +52,10 @@ namespace ChicAPI
             {
                 Console.WriteLine(e.ErrorCode);
                 Console.WriteLine(e.ErrorMessage);
+                Epic = new EpicServices(GetSid(), OAuthService.AuthTokenType.LAUNCHER);
             }
+
+            Console.WriteLine(Epic == null);
 
             Database.SetValue("AccessToken", Epic.AccessToken);
             Database.SetValue("RefreshToken", Epic.RefreshToken);
