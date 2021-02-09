@@ -3,6 +3,7 @@ using EpicGames.NET.Models;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Diagnostics;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using EntryItem = ChicAPI.Models.EntryItem;
@@ -41,6 +42,9 @@ namespace ChicAPI.Controllers
                 var catalog = GetCatalog();
                 var content = Program.Epic.FortniteService.GetContent();
 
+                var now = DateTime.UtcNow;
+
+                shop.ShopDate = new DateTime(now.Year, now.Month, now.Day, 0, 0, 0);
                 shop.Expiration = catalog.Expiration;
                 shop.Sections = new Dictionary<string, List<ShopEntry>>();
                 shop.SectionInfos = new List<ShopSection>();

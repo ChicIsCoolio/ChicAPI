@@ -1,4 +1,4 @@
-﻿using EpicGames.NET.Models;
+using EpicGames.NET.Models;
 using Fortnite_API.Objects.V2;
 using Newtonsoft.Json;
 using System;
@@ -10,6 +10,8 @@ namespace ChicAPI.Models
 {
     public struct ChicShop
     {
+        [JsonProperty("shopDate")]
+        public DateTime ShopDate;
         [JsonProperty("expiration")]
         public DateTime Expiration;
         [JsonProperty("sections")]
