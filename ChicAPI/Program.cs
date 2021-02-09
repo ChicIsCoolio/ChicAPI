@@ -8,7 +8,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using ChicAPI.Chic;
+using ChicAPI.Controllers;
+using ChicAPI.Models;
 using EpicGames.NET.Models;
+using System.Linq;
 using System.Reactive.Concurrency;
 using Fortnite_API;
 
@@ -61,6 +64,18 @@ namespace ChicAPI
                 reschedule(Epic.ExpiresAt.AddSeconds(-10));
             });
 
+            Scheduler.Default.Schedule(ShopController.GetCatalog().Expiration, reschedule =>
+            {
+                reschedule(ShopController.GetCatalog().Expiration);
+            });
+
+            Scheduler.Default.Schedule(ShopController.GetChicShop().Data.Expiration, reschedule =>
+            {
+                var shop = ShopController.GetChicShop();
+                if (shop.Status == Status.NOT_READY) reschedule(DateTimeOffset.Now.AddSeconds(30));
+                else reschedule(shop.Data.Expiration);
+            });
+
             CreateHostBuilder(args).Build().Run();
         }
 
@@ -107,5 +122,8 @@ namespace ChicAPI
                 writer.Write(data);
             }
         }
+
+        public static void ClearCache()
+            => ListCache().ToList().ForEach(file => File.Delete(file));
     }
 }

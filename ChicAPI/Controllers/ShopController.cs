@@ -33,7 +33,7 @@ namespace ChicAPI.Controllers
             return GetCatalog();
         }
 
-        ChicResponse<ChicShop> GetChicShop()
+        public static ChicResponse<ChicShop> GetChicShop()
         {
             if (HasChicShopInCache(out ChicShop shop)) return new ChicResponse<ChicShop>(Status.OK, shop);
             try
@@ -126,19 +126,20 @@ namespace ChicAPI.Controllers
             }
         }
 
-        Catalog GetCatalog()
+        public static Catalog GetCatalog()
         {
             if (HasCatalogInCache(out Catalog catalog)) return catalog;
             else 
             {
                 Console.WriteLine("Downloading shop from Epic Servers");
                 catalog = Program.Epic.GetCatalog();
+                Program.ClearCache();
                 Program.SaveToCache(JsonConvert.SerializeObject(catalog, Formatting.Indented), $"RawShop_{catalog.Expiration.ToString().Replace(' ', '_').Replace(":", ".").Replace("/", "-")}");
                 return catalog;
             }
         }
 
-        bool HasChicShopInCache(out ChicShop shop)
+        static bool HasChicShopInCache(out ChicShop shop)
         {
             shop = new ChicShop();
 
@@ -155,7 +156,7 @@ namespace ChicAPI.Controllers
             else return false;
         }
 
-        bool HasCatalogInCache(out Catalog catalog)
+        static bool HasCatalogInCache(out Catalog catalog)
         {
             catalog = new Catalog();
 
