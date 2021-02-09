@@ -44,7 +44,7 @@ namespace ChicAPI.Controllers
                         BasePrice = entry.Prices.Length > 0 ? entry.Prices[0].BasePrice : 0,
                         FinalPrice = entry.Prices.Length > 0 ? entry.Prices[0].FinalPrice : 0,
                         Categories = entry.Categories,
-                        Items = new EntryItem[0],
+                        Items = new List<EntryItem>(),
                         SortPriority = entry.SortPriority,
                         MetaInfo = entry.MetaInfo,
                         Meta = entry.Meta
