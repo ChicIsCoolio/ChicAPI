@@ -6,6 +6,7 @@ using System;
 using System.Diagnostics;
 using Newtonsoft.Json;
 using System.Collections.Generic;
+using Fortnite_API.Objects.V2;
 using EntryItem = ChicAPI.Models.EntryItem;
 using ShopSection = ChicAPI.Models.ShopSection;
 using ChicAPI.Chic;
@@ -41,6 +42,14 @@ namespace ChicAPI.Controllers
             {
                 var catalog = GetCatalog();
                 var content = Program.Epic.FortniteService.GetContent();
+                var fnApiShop = Program.FortniteApi.V2.Shop.GetBr().Data;
+                
+                var empty = new List<BrShopV2StoreFrontEntry>();
+
+                var fnApiEntries = (fnApiShop.HasFeatured ? fnApiShop.Featured : fnApiShop.HasDaily ?
+                    fnApiShop.Daily : fnApiShop.HasSpecialFeatured ? fnApiShop.SpecialFeatured : fnApiShop.SpecialDaily).Entries.Concat(fnApiShop.HasDaily ? fnApiShop.Daily.Entries : empty)
+                        .Concat(fnApiShop.HasSpecialFeatured ? fnApiShop.SpecialFeatured.Entries : empty)
+                        .Concat(fnApiShop.HasSpecialDaily ? fnApiShop.SpecialDaily.Entries : empty).ToList();
 
                 var now = DateTime.UtcNow;
 
@@ -65,6 +74,7 @@ namespace ChicAPI.Controllers
                             FinalPrice = entry.Prices.Length > 0 ? entry.Prices[0].FinalPrice : 0,
                             Categories = entry.Categories,
                             Items = new List<EntryItem>(),
+                            Bundle = fnApiEntries.First(predicate: x => x.OfferId == entry.OfferId).Bundle,
                             SortPriority = entry.SortPriority,
                             MetaInfo = entry.MetaInfo,
                             Meta = entry.Meta
@@ -124,8 +134,9 @@ namespace ChicAPI.Controllers
                 Program.SaveToCache(JsonConvert.SerializeObject(shop, Formatting.Indented), $"ChicShop_{catalog.Expiration.ToString().Replace(' ', '_').Replace(":", ".").Replace("/", "-")}");
                 return new ChicResponse<ChicShop>(Status.OK, shop);
             }
-            catch
+            catch (Exception e)
             {
+                Console.WriteLine(e);
                 return new ChicResponse<ChicShop>(Status.NOT_READY, new ChicShop());
             }
         }
