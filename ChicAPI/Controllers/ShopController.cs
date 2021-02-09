@@ -18,14 +18,28 @@ namespace ChicAPI.Controllers
         [HttpGet("br")]
         public ActionResult<ChicResponse<ChicShop>> GetShop()
         {
+            if (!IsAuthed())
+                return Unauthorized(new { Error = "Unauthorized", Message = "Try again later" });
+
+            return GetChicShop();
+        }
+
+        [HttpGet("raw")]
+        public ActionResult<Catalog> GetShopRaw()
+        {
+            if (!IsAuthed())
+                return Unauthorized(new { Error = "Unauthorized", Message = "Try again later" });
+        
+            return GetCatalog();
+        }
+
+        ChicResponse<ChicShop> GetChicShop()
+        {
+            if (HasChicShopInCache(out ChicShop shop)) return new ChicResponse<ChicShop>(Status.OK, shop);
             try
             {
-                if (!IsAuthed())
-                    return Unauthorized(new { Error = "Unauthorized", Message = "Try again later" });
-
                 var catalog = GetCatalog();
                 var content = Program.Epic.FortniteService.GetContent();
-                var shop = new ChicShop();
 
                 shop.Expiration = catalog.Expiration;
                 shop.Sections = new Dictionary<string, List<ShopEntry>>();
@@ -103,6 +117,7 @@ namespace ChicAPI.Controllers
 
                 shop.Sections = sections;
 
+                Program.SaveToCache(JsonConvert.SerializeObject(shop, Formatting.Indented), $"ChicShop_{catalog.Expiration.ToString().Replace(' ', '_').Replace(":", ".").Replace("/", "-")}");
                 return new ChicResponse<ChicShop>(Status.OK, shop);
             }
             catch
@@ -111,26 +126,33 @@ namespace ChicAPI.Controllers
             }
         }
 
-        [HttpGet("raw")]
-        public ActionResult<Catalog> GetShopRaw()
-        {
-            if (!IsAuthed())
-                return Unauthorized(new { Error = "Unauthorized", Message = "Try again later" });
-        
-            return GetCatalog();
-        }
-
         Catalog GetCatalog()
         {
             if (HasCatalogInCache(out Catalog catalog)) return catalog;
             else 
             {
-                Console.WriteLine("Something");
-
+                Console.WriteLine("Downloading shop from Epic Servers");
                 catalog = Program.Epic.GetCatalog();
                 Program.SaveToCache(JsonConvert.SerializeObject(catalog, Formatting.Indented), $"RawShop_{catalog.Expiration.ToString().Replace(' ', '_').Replace(":", ".").Replace("/", "-")}");
                 return catalog;
             }
+        }
+
+        bool HasChicShopInCache(out ChicShop shop)
+        {
+            shop = new ChicShop();
+
+            if (!Program.ListCache().Any(x => x.Contains("ChicShop_"))) return false;
+
+            var date = Program.ListCache().Where(x => x.Contains("ChicShop_"))
+                .Max(x => DateTime.Parse(x.Split("ChicShop_")[1].Replace('_', ' ').Replace('.', ':').Replace('-', '/')));
+
+            if (date - DateTime.UtcNow > TimeSpan.Zero)
+            {
+                shop = JsonConvert.DeserializeObject<ChicShop>(Program.LoadFromCache($"ChicShop_{date.ToString().Replace(' ', '_').Replace(":", ".").Replace("/", "-")}"));
+                return true;
+            }
+            else return false;
         }
 
         bool HasCatalogInCache(out Catalog catalog)
