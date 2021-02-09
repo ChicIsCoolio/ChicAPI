@@ -20,8 +20,12 @@ namespace ChicAPI.Models
 
     public struct ShopSection
     {
+        [JsonProperty("displayName")]
+        public string DisplayName;
         [JsonProperty("id")]
         public string SectionId;
+        [JsonProperty("landingPriority")]
+        public int LandingPriority;
     }
 
     public struct ShopEntry

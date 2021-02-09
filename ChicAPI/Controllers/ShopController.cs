@@ -6,7 +6,7 @@ using System;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using EntryItem = ChicAPI.Models.EntryItem;
-using Microsoft.AspNetCore.Http.Features;
+using ShopSection = ChicAPI.Models.ShopSection;
 
 namespace ChicAPI.Controllers
 {
@@ -21,6 +21,7 @@ namespace ChicAPI.Controllers
                 return Unauthorized(new { Error = "Unauthorized", Message = "Try again later" });
 
             var catalog = GetCatalog();
+            var content = Program.Epic.FortniteService.GetContent();
             var shop = new ChicShop();
 
             shop.Expiration = catalog.Expiration;
@@ -71,9 +72,13 @@ namespace ChicAPI.Controllers
 
                     if (!shop.Sections.ContainsKey(sectionId))
                     {
+                        var section = content.ShopSections.GetSectionById(sectionId);
+
                         shop.SectionInfos = shop.SectionInfos.Append(new ShopSection
                         {
-                            SectionId = sectionId
+                            DisplayName = section.DisplayName,
+                            SectionId = sectionId,
+                            LandingPriority = section.LandingPriority
                         }).ToArray();
 
                         shop.Sections.Add(sectionId, new ShopEntry[] { e });
