@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using System.Collections.Generic;
 using EntryItem = ChicAPI.Models.EntryItem;
 using ShopSection = ChicAPI.Models.ShopSection;
+using ChicAPI.Chic;
 
 namespace ChicAPI.Controllers
 {
@@ -25,8 +26,8 @@ namespace ChicAPI.Controllers
             var shop = new ChicShop();
 
             shop.Expiration = catalog.Expiration;
-            shop.Sections = new Dictionary<string, ShopEntry[]>();
-            shop.SectionInfos = new ShopSection[0];
+            shop.Sections = new Dictionary<string, List<ShopEntry>>();
+            shop.SectionInfos = new List<ShopSection>();
 
             foreach (var storefront in catalog.Storefronts.Where(x => x.Name == "BRWeeklyStorefront"
                 || x.Name == "BRDailyStorefront" || x.Name == "BRSpecialFeatured"
@@ -54,7 +55,7 @@ namespace ChicAPI.Controllers
                         var id = grant.TemplateId.Split(':')[1];
                         var info = Program.FortniteApi.V2.Cosmetics.GetBr(id).Data;
 
-                        e.Items = e.Items.Append(new EntryItem
+                        e.Items.Add(new EntryItem
                         {
                             Id = id,
                             Quantity = grant.Quantity,
@@ -64,7 +65,7 @@ namespace ChicAPI.Controllers
                             Series = info.Series,
                             Type = info.Type,
                             ShopHistory = info.ShopHistory.ToArray()
-                        }).ToArray();
+                        });
                     }
 
                     if (!entry.Meta.TryGetValue("SectionId", out string sectionId))
@@ -74,21 +75,31 @@ namespace ChicAPI.Controllers
                     {
                         var section = content.ShopSections.GetSectionById(sectionId);
 
-                        shop.SectionInfos = shop.SectionInfos.Append(new ShopSection
+                        shop.SectionInfos.Add(new ShopSection
                         {
                             DisplayName = section.DisplayName,
                             SectionId = sectionId,
                             LandingPriority = section.LandingPriority
-                        }).ToArray();
+                        });
 
-                        shop.Sections.Add(sectionId, new ShopEntry[] { e });
+                        shop.Sections.Add(sectionId, new List<ShopEntry> { e });
                     }
                     else
                     {
-                        shop.Sections[sectionId] = shop.Sections[sectionId].Append(e).ToArray();
+                        shop.Sections[sectionId].Add(e);
                     }
                 }
             }
+
+            shop.SectionInfos.Sort(ShopSectionComparer.Comparer);
+            var sections = new Dictionary<string, List<ShopEntry>>();
+
+            foreach (var section in shop.SectionInfos)
+            {
+                sections.Add(section.SectionId, shop.Sections.First(predicate: x => x.Key == section.SectionId).Value);
+            }
+
+            shop.Sections = sections;
 
             return new ChicResponse<ChicShop>(Status.OK, shop);
         }

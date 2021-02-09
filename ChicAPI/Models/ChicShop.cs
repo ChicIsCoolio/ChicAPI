@@ -13,9 +13,9 @@ namespace ChicAPI.Models
         [JsonProperty("expiration")]
         public DateTime Expiration;
         [JsonProperty("sections")]
-        public Dictionary<string, ShopEntry[]> Sections;
+        public Dictionary<string, List<ShopEntry>> Sections;
         [JsonProperty("sectionInfos")]
-        public ShopSection[] SectionInfos;
+        public List<ShopSection> SectionInfos;
     }
 
     public struct ShopSection
@@ -45,7 +45,7 @@ namespace ChicAPI.Models
         [JsonProperty("categories")]
         public string[] Categories;
         [JsonProperty("items")]
-        public EntryItem[] Items;
+        public List<EntryItem> Items;
         [JsonProperty("sortPriority")]
         public int SortPriority;
         [JsonProperty("metaInfo")]
@@ -72,5 +72,47 @@ namespace ChicAPI.Models
         public BrCosmeticV2Type Type;
         [JsonProperty("shopHistory")]
         public DateTime[] ShopHistory;
+    }
+
+    public class ShopSectionComparer : IComparer<ShopSection>
+    {
+        public static ShopSectionComparer Comparer = new ShopSectionComparer();
+
+        public int Compare(ShopSection x, ShopSection y)
+        {
+            string xId = x.SectionId;
+            string yId = y.SectionId;
+
+
+            if (xId.Contains("Featured") || yId.Contains("Featured"))
+            {
+                if (xId == "Featured") return -1;
+                if (yId == "Featured") return 1;
+
+                int.TryParse(xId.Replace("Featured", ""), out int xFeatured);
+                int.TryParse(yId.Replace("Featured", ""), out int yFeatured);
+
+                if (xFeatured > yFeatured) return -1;
+                if (yFeatured > xFeatured) return 1;
+            }
+
+            if (xId.Contains("Daily") || yId.Contains("Daily"))
+            {
+                if (xId.Contains("Featured")) return -1;
+                if (yId.Contains("Featured")) return 1;
+
+                if (xId == "Daily") return -1;
+                if (yId == "Daily") return 1;
+
+                int.TryParse(xId.Replace("Daily", ""), out int xDaily);
+                int.TryParse(yId.Replace("Daily", ""), out int yDaily);
+
+                if (xDaily > yDaily) return -1;
+                if (yDaily > xDaily) return 1;
+            }
+
+            return x.LandingPriority > y.LandingPriority ? -1 : x.LandingPriority < y.LandingPriority ?
+                1 : 0;
+        }
     }
 }
