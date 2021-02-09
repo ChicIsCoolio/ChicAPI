@@ -52,6 +52,8 @@ namespace ChicAPI.Models
         public int SortPriority;
         [JsonProperty("bundle")]
         public BrShopV2StoreFrontEntryBundle Bundle;
+        [JsonProperty("banner")]
+        public BrShopV2StoreFrontEntryBanner Banner;
         [JsonProperty("metaInfo")]
         public KeyValue[] MetaInfo;
         [JsonProperty("meta")]

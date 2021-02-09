@@ -40,6 +40,8 @@ namespace ChicAPI.Controllers
             if (HasChicShopInCache(out ChicShop shop)) return new ChicResponse<ChicShop>(Status.OK, shop);
             try
             {
+                Stopwatch watch = new Stopwatch();
+                watch.Start();
                 var catalog = GetCatalog();
                 var content = Program.Epic.FortniteService.GetContent();
                 var fnApiShop = Program.FortniteApi.V2.Shop.GetBr().Data;
@@ -64,6 +66,8 @@ namespace ChicAPI.Controllers
                 {
                     foreach (var entry in storefront.Entries)
                     {
+                        var apiEntry = fnApiEntries.First(predicate: x => x.OfferId == entry.OfferId);
+
                         ShopEntry e = new ShopEntry
                         {
                             OfferId = entry.OfferId,
@@ -74,7 +78,8 @@ namespace ChicAPI.Controllers
                             FinalPrice = entry.Prices.Length > 0 ? entry.Prices[0].FinalPrice : 0,
                             Categories = entry.Categories,
                             Items = new List<EntryItem>(),
-                            Bundle = fnApiEntries.First(predicate: x => x.OfferId == entry.OfferId).Bundle,
+                            Bundle = apiEntry.Bundle,
+                            Banner = apiEntry.Banner,
                             SortPriority = entry.SortPriority,
                             MetaInfo = entry.MetaInfo,
                             Meta = entry.Meta
@@ -83,7 +88,7 @@ namespace ChicAPI.Controllers
                         foreach (var grant in entry.ItemGrants)
                         {
                             var id = grant.TemplateId.Split(':')[1];
-                            var info = Program.FortniteApi.V2.Cosmetics.GetBr(id).Data;
+                            var info = apiEntry.Items.First(predicate: x => x.Id == id);
 
                             e.Items.Add(new EntryItem
                             {
@@ -132,6 +137,8 @@ namespace ChicAPI.Controllers
                 shop.Sections = sections;
 
                 Program.SaveToCache(JsonConvert.SerializeObject(shop, Formatting.Indented), $"ChicShop_{catalog.Expiration.ToString().Replace(' ', '_').Replace(":", ".").Replace("/", "-")}");
+                watch.Stop();
+                Console.WriteLine($"Done in {watch.Elapsed}");
                 return new ChicResponse<ChicShop>(Status.OK, shop);
             }
             catch (Exception e)
