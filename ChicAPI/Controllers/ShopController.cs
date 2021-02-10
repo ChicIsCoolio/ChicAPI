@@ -53,9 +53,7 @@ namespace ChicAPI.Controllers
                         .Concat(fnApiShop.HasSpecialFeatured ? fnApiShop.SpecialFeatured.Entries : empty)
                         .Concat(fnApiShop.HasSpecialDaily ? fnApiShop.SpecialDaily.Entries : empty).ToList();
 
-                var now = DateTime.UtcNow;
-
-                shop.ShopDate = new DateTime(now.Year, now.Month, now.Day, 0, 0, 0);
+                shop.ShopDate = fnApiShop.Date;
                 shop.Expiration = catalog.Expiration;
                 shop.Sections = new Dictionary<string, List<ShopEntry>>();
                 shop.SectionInfos = new List<ShopSection>();
@@ -73,9 +71,9 @@ namespace ChicAPI.Controllers
                             OfferId = entry.OfferId,
                             OfferType = entry.OfferType,
                             CurrencyType = entry.Prices.Length > 0 ? entry.Prices[0].CurrencyType : "",
-                            RegularPrice = entry.Prices.Length > 0 ? entry.Prices[0].RegularPrice : 0,
+                            RegularPrice = apiEntry.RegularPrice,
                             BasePrice = entry.Prices.Length > 0 ? entry.Prices[0].BasePrice : 0,
-                            FinalPrice = entry.Prices.Length > 0 ? entry.Prices[0].FinalPrice : 0,
+                            FinalPrice = apiEntry.FinalPrice,
                             Categories = entry.Categories,
                             Items = new List<EntryItem>(),
                             Bundle = apiEntry.Bundle,
@@ -154,7 +152,6 @@ namespace ChicAPI.Controllers
             if (HasCatalogInCache(out Catalog catalog)) return catalog;
             else 
             {
-                Console.WriteLine("Downloading shop from Epic Servers");
                 catalog = Program.Epic.GetCatalog();
                 Program.ClearCache();
                 Program.SaveToCache(JsonConvert.SerializeObject(catalog, Formatting.Indented), $"RawShop_{catalog.Expiration.ToString().Replace(' ', '_').Replace(":", ".").Replace("/", "-")}");
