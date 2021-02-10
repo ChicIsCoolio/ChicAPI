@@ -127,8 +127,9 @@ namespace ChicAPI.Models
                 if (yDaily > xDaily) return 1;
             }
 
-            return x.LandingPriority > y.LandingPriority ? -1 : x.LandingPriority < y.LandingPriority ?
-                1 : 0;
+            return x.LandingPriority > y.LandingPriority ? -1 : x.LandingPriority < y.LandingPriority ? 1 : 0;
+
+            //return x.LandingPriority > y.LandingPriority ? 1 : x.LandingPriority < y.LandingPriority ? -1 : 0;
         }
     }
 }
