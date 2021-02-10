@@ -125,6 +125,11 @@ namespace ChicAPI.Controllers
                     }
                 }
 
+                shop.Sections.ToList().ForEach(section =>
+                {
+                    section.Value.Sort(ShopEntryComparer.Comparer);
+                });
+
                 shop.SectionInfos.Sort(ShopSectionComparer.Comparer);
                 var sections = new Dictionary<string, List<ShopEntry>>();
 

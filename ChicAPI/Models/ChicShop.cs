@@ -60,6 +60,16 @@ namespace ChicAPI.Models
         public Dictionary<string, string> Meta;
     }
 
+    public class ShopEntryComparer : IComparer<ShopEntry>
+    {
+        public static ShopEntryComparer Comparer = new ShopEntryComparer();
+
+        public int Compare(ShopEntry x, ShopEntry y)
+        {
+            return x.SortPriority > y.SortPriority ? -1 : x.SortPriority < y.SortPriority ? 1 : 0;
+        }
+    }
+
     public struct EntryItem
     {
         [JsonProperty("id")]
