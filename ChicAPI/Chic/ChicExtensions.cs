@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Markup;
+using System.Reflection;
 using Fortnite_API.Objects.V2;
+using Mono.Reflection;
 
 namespace ChicAPI.Chic
 {
@@ -25,20 +27,20 @@ namespace ChicAPI.Chic
 
         public static BrCosmeticV2Rarity Set(this BrCosmeticV2Rarity r, string value, string displayValue, string backendValue)
         {
-            r.Value = value;
-            r.DisplayValue = displayValue;
-            r.BackendValue = backendValue;
+            typeof(BrCosmeticV2Rarity).GetProperty("Value").GetBackingField().SetValue(r, value);
+            typeof(BrCosmeticV2Rarity).GetProperty("DisplayValue").GetBackingField().SetValue(r, displayValue);
+            typeof(BrCosmeticV2Rarity).GetProperty("backendValue").GetBackingField().SetValue(r, backendValue);
 
             return r;
         }
 
         public static BrCosmeticV2Type Set(this BrCosmeticV2Type t, string value, string displayValue, string backendValue)
         {
-            t.Value = value;
-            t.DisplayValue = displayValue;
-            t.BackendValue = backendValue;
+            typeof(BrCosmeticV2Rarity).GetProperty("Value").GetBackingField().SetValue(t, value);
+            typeof(BrCosmeticV2Rarity).GetProperty("DisplayValue").GetBackingField().SetValue(t, displayValue);
+            typeof(BrCosmeticV2Rarity).GetProperty("backendValue").GetBackingField().SetValue(t, backendValue);
 
-            return r;
+            return t;
         }
     }
 }
