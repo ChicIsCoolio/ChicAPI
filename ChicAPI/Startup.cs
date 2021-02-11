@@ -10,6 +10,7 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using Microsoft.Extensions.FileProviders;
 
 namespace ChicAPI
 {
@@ -33,6 +34,12 @@ namespace ChicAPI
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider($"{Program.Root}static"),
+                RequestPath = "/"
+            });
 
             app.UseRouting();
             app.UseEndpoints(endpoints =>

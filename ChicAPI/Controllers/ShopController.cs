@@ -93,9 +93,9 @@ namespace ChicAPI.Controllers
                                 {
                                     Id = id,
                                     Quantity = grant.Quantity,
-                                    Image = new Uri("https://ChicAPI.ChicIsCoolio.repl.co/images/Icon_ChallengeBundle"),
+                                    Image = new Uri("https://ChicAPI.ChicIsCoolio.repl.co/images/Icon_ChallengeBundle.png"),
                                     Name = "Challenge Bundle",
-                                    Rarity = new BrCosmeticV2Rarity.Set("legendary", "Legendary", "EFortRarity::Legendary"),
+                                    Rarity = new BrCosmeticV2Rarity().Set("legendary", "Legendary", "EFortRarity::Legendary"),
                                     Series = null,
                                     Type = new BrCosmeticV2Type().Set(type.ToLower(), "Challenge Bundle", type),
                                     ShopHistory = null
