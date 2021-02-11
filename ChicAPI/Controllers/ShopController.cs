@@ -55,6 +55,8 @@ namespace ChicAPI.Controllers
 
                 shop.ShopDate = fnApiShop.Date;
                 shop.Expiration = catalog.Expiration;
+                shop.SpecialEvent = ChicVariables.GetVariable<string>("shopSpecialEvent");
+                shop.BackgroundColor = ChicVariables.GetVariable<string>("shopBackgroundColor");
                 shop.Sections = new Dictionary<string, List<ShopEntry>>();
                 shop.SectionInfos = new List<ShopSection>();
 

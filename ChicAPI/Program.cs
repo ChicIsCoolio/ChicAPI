@@ -19,7 +19,7 @@ namespace ChicAPI
 {
     public class Program
     {
-        public static string Root = "/home/runner/ChicAPI/";
+        public static string Root = @"C:\Users\Hopík\source\repos\ChicAPI\";//"/home/runner/ChicAPI/";
 
         public static EpicServices Epic;
         public static FortniteApiClient FortniteApi;
