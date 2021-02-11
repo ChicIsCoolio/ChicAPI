@@ -86,20 +86,37 @@ namespace ChicAPI.Controllers
                         foreach (var grant in entry.ItemGrants)
                         {
                             var id = grant.TemplateId.Split(':')[1];
-
-                            var info = apiEntry.Items.First(predicate: x => x.Id.ToLower() == id.ToLower());
-
-                            e.Items.Add(new EntryItem
+                            var type = grant.TemplateId.Split(':')[0];
+                            if (type.Contains("Challenge"))
                             {
-                                Id = id,
-                                Quantity = grant.Quantity,
-                                Image = info.Images.HasFeatured ? info.Images.Featured : info.Images.Icon,
-                                Name = info.Name,
-                                Rarity = info.Rarity,
-                                Series = info.Series,
-                                Type = info.Type,
-                                ShopHistory = info.ShopHistory.ToArray()
-                            });
+                                e.Items.Add(new EntryItem
+                                {
+                                    Id = id,
+                                    Quantity = grant.Quantity,
+                                    Image = new Uri("https://ChicAPI.ChicIsCoolio.repl.co/images/Icon_ChallengeBundle"),
+                                    Name = "Challenge Bundle",
+                                    Rarity = new BrCosmeticV2Rarity.Set("legendary", "Legendary", "EFortRarity::Legendary"),
+                                    Series = null,
+                                    Type = new BrCosmeticV2Type().Set(type.ToLower(), "Challenge Bundle", type),
+                                    ShopHistory = null
+                                });
+                            }
+                            else
+                            {
+                                var info = apiEntry.Items.First(predicate: x => x.Id.ToLower() == id.ToLower());
+
+                                e.Items.Add(new EntryItem
+                                {
+                                    Id = id,
+                                    Quantity = grant.Quantity,
+                                    Image = info.Images.HasFeatured ? info.Images.Featured : info.Images.Icon,
+                                    Name = info.Name,
+                                    Rarity = info.Rarity,
+                                    Series = info.Series,
+                                    Type = info.Type,
+                                    ShopHistory = info.ShopHistory.ToArray()
+                                });
+                            }
                         }
 
                         if (!entry.Meta.TryGetValue("SectionId", out string sectionId))

@@ -61,6 +61,10 @@ namespace ChicAPI
             Scheduler.Default.Schedule(Epic.ExpiresAt.AddSeconds(-10), reschedule =>
             {
                 Epic.RefreshSession();
+                
+                Database.SetValue("AccessToken", Epic.AccessToken);
+                Database.SetValue("RefreshToken", Epic.RefreshToken);
+                
                 reschedule(Epic.ExpiresAt.AddSeconds(-10));
             });
 
