@@ -29,16 +29,16 @@ namespace ChicAPI.Chic
         {
             typeof(BrCosmeticV2Rarity).GetProperty("Value").GetBackingField().SetValue(r, value);
             typeof(BrCosmeticV2Rarity).GetProperty("DisplayValue").GetBackingField().SetValue(r, displayValue);
-            typeof(BrCosmeticV2Rarity).GetProperty("backendValue").GetBackingField().SetValue(r, backendValue);
+            typeof(BrCosmeticV2Rarity).GetProperty("BackendValue").GetBackingField().SetValue(r, backendValue);
 
             return r;
         }
 
         public static BrCosmeticV2Type Set(this BrCosmeticV2Type t, string value, string displayValue, string backendValue)
         {
-            typeof(BrCosmeticV2Rarity).GetProperty("Value").GetBackingField().SetValue(t, value);
-            typeof(BrCosmeticV2Rarity).GetProperty("DisplayValue").GetBackingField().SetValue(t, displayValue);
-            typeof(BrCosmeticV2Rarity).GetProperty("backendValue").GetBackingField().SetValue(t, backendValue);
+            typeof(BrCosmeticV2Type).GetProperty("Value").GetBackingField().SetValue(t, value);
+            typeof(BrCosmeticV2Type).GetProperty("DisplayValue").GetBackingField().SetValue(t, displayValue);
+            typeof(BrCosmeticV2Type).GetProperty("BackendValue").GetBackingField().SetValue(t, backendValue);
 
             return t;
         }

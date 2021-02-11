@@ -37,8 +37,8 @@ namespace ChicAPI
 
             app.UseStaticFiles(new StaticFileOptions
             {
-                FileProvider = new PhysicalFileProvider($"{Program.Root}static"),
-                RequestPath = "/"
+                FileProvider = new PhysicalFileProvider($"{Program.Root}static/images"),
+                RequestPath = "/images"
             });
 
             app.UseRouting();

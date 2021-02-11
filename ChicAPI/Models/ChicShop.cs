@@ -14,6 +14,10 @@ namespace ChicAPI.Models
         public DateTime ShopDate;
         [JsonProperty("expiration")]
         public DateTime Expiration;
+        [JsonProperty("specialEvent")]
+        public string SpecialEvent;
+        [JsonProperty("backgroundColor")]
+        public string BackgroundColor;
         [JsonProperty("sections")]
         public Dictionary<string, List<ShopEntry>> Sections;
         [JsonProperty("sectionInfos")]
