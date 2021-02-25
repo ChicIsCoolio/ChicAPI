@@ -1,3 +1,5 @@
+#define USE_EPICGAMES
+
 using EpicGames.NET;
 using EpicGames.NET.Services;
 using Microsoft.AspNetCore.Hosting;
@@ -14,6 +16,8 @@ using EpicGames.NET.Models;
 using System.Linq;
 using System.Reactive.Concurrency;
 using Fortnite_API;
+using SkiaSharp;
+using System.Net.Http;
 
 namespace ChicAPI
 {
@@ -27,7 +31,9 @@ namespace ChicAPI
         public static void Main(string[] args)
         {
             FortniteApi = new FortniteApiClient(Environment.GetEnvironmentVariable("APIKEY"));
-            
+
+
+#if USE_EPICGAMES
             try
             {
                 if (Database.TryGetValue("AccessToken", out string token) &&
@@ -52,7 +58,6 @@ namespace ChicAPI
                 Console.WriteLine(e.ErrorMessage);
                 Epic = new EpicServices(GetSid(), OAuthService.AuthTokenType.LAUNCHER);
             }
-
             Database.SetValue("AccessToken", Epic.AccessToken);
             Database.SetValue("RefreshToken", Epic.RefreshToken);
 
@@ -67,18 +72,9 @@ namespace ChicAPI
                 
                 reschedule(Epic.ExpiresAt.AddSeconds(-10));
             });
-
-            /*Scheduler.Default.Schedule(ShopController.GetCatalog().Expiration, reschedule =>
-            {
-                reschedule(ShopController.GetCatalog().Expiration);
-            });
-
-            Scheduler.Default.Schedule(ShopController.GetChicShop().Data.Expiration.AddSeconds(1), reschedule =>
-            {
-                var shop = ShopController.GetChicShop();
-                if (shop.Status == Status.NOT_READY) reschedule(DateTimeOffset.Now.AddSeconds(2));
-                else reschedule(shop.Data.Expiration);
-            });*/
+#else
+#warning The Epic Games auth is disabled
+#endif
 
             CreateHostBuilder(args).Build().Run();
         }
@@ -90,7 +86,7 @@ namespace ChicAPI
                     webBuilder.UseStartup<Startup>();
                     webBuilder.UseUrls("http://0.0.0.0:8080");
                 });
-    
+
         private static string GetSid()
         {
             Console.WriteLine(OAuthService.LoginURL);
@@ -111,6 +107,8 @@ namespace ChicAPI
 
         public static string[] ListCache() => Directory.GetFiles($"{Root}Cache");
 
+        public static bool IsInCache(string fileName) => ListCache().Any(x => Path.GetFileName(x) == fileName);
+
         public static string LoadFromCache(string fileName)
         {
             using (StreamReader reader = new StreamReader($"{Root}Cache/{fileName}"))
@@ -118,6 +116,9 @@ namespace ChicAPI
                 return reader.ReadToEnd();
             }
         }
+
+        public static SKBitmap LoadBitmapFromCache(string fileName)
+            => SKBitmap.Decode($"{Root}Cache/{fileName}.png");
 
         public static void SaveToCache(string data, string fileName)
         {
@@ -127,8 +128,31 @@ namespace ChicAPI
             }
         }
 
+        public static void SaveToCache(SKBitmap bitmap, string fileName, bool dispose = true)
+        {
+            using (var image = SKImage.FromBitmap(bitmap))
+            using (var data = image.Encode(SKEncodedImageFormat.Png, 100))
+            using (var stream = File.OpenWrite($"{Root}Cache/{fileName}.png"))
+                data.SaveTo(stream);
+        }
+
         public static void ClearCache()
             => ListCache().ToList().ForEach(file => File.Delete(file));
+
+        public static SKBitmap BitmapFromUrl(Uri url, string name = "eek")
+        {
+            if (url == null) return null;
+
+            using (var client = new HttpClient())
+            using (var stream = client.GetStreamAsync(url).Result)
+            {
+                var bitmap = SKBitmap.Decode(stream);
+
+                SaveToCache(bitmap, name, false);
+
+                return bitmap;
+            }
+        }
 
         public static bool IsAuthed()
         {
