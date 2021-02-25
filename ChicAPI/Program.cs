@@ -129,5 +129,10 @@ namespace ChicAPI
 
         public static void ClearCache()
             => ListCache().ToList().ForEach(file => File.Delete(file));
+
+        public static bool IsAuthed()
+        {
+            return !(Epic == null || !Epic.Authenticated);
+        }
     }
 }

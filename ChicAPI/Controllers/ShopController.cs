@@ -20,7 +20,7 @@ namespace ChicAPI.Controllers
         [HttpGet("br")]
         public ActionResult<ChicResponse<ChicShop>> GetShop()
         {
-            if (!IsAuthed())
+            if (!Program.IsAuthed())
                 return Unauthorized(new { Error = "Unauthorized", Message = "Try again later" });
 
             return GetChicShop();
@@ -29,7 +29,7 @@ namespace ChicAPI.Controllers
         [HttpGet("raw")]
         public ActionResult<Catalog> GetShopRaw()
         {
-            if (!IsAuthed())
+            if (!Program.IsAuthed())
                 return Unauthorized(new { Error = "Unauthorized", Message = "Try again later" });
         
             return GetCatalog();
@@ -215,11 +215,6 @@ namespace ChicAPI.Controllers
                 return true;
             }
             else return false;
-        }
-
-        bool IsAuthed()
-        {
-            return !(Program.Epic == null || !Program.Epic.Authenticated);
         }
     }
 }
